@@ -1,5 +1,5 @@
 {
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
-  "entryFile":"bannayuucalculate"
+  "entryFile":"bannayuu-calculate-api"
 }
