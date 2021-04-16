@@ -14,12 +14,16 @@ import { CalculateController } from './calculate.controller';
 import { CalculateService } from './calculate.service';
 import { GetCalConfigSubService } from '../get-cal-config-sub/get-cal-config-sub.service'
 import { CalculateFinallyService } from '../calculate-finally/calculate-finally.service';
+import { PromotionService } from '../promotion/promotion.service';
+import { vsActionOutVerifyEstampMiddleware } from 'src/middleware/calculate/calculate.middleware';
+import { EmployeeMiddleware } from 'src/middleware/employee/employee.middleware';
+import { InsertLogService } from 'src/insert-log/insert-log.service';
 @Module({
   controllers: [CalculateController],
   providers: [
-    CalculateService, 
-    dbConnection, 
-    FormatDataUtils, 
+    CalculateService,
+    dbConnection,
+    FormatDataUtils,
     ErrMessageUtilsTH,
     SplitDateService,
     GetCalConfigMasterService,
@@ -29,6 +33,8 @@ import { CalculateFinallyService } from '../calculate-finally/calculate-finally.
     CalTimeDiffService,
     LoadSettingLocalUtils,
     CalculateFinallyService,
+    PromotionService,
+    InsertLogService,
   ]
 })
 export class CalculateModule {
@@ -37,7 +43,7 @@ export class CalculateModule {
       .apply(DefaultValueMiddleware)
       .forRoutes('api/bannayuu/calculate/*');
     consumer
-      .apply(DateTimeMiddleware)
+      .apply(DateTimeMiddleware, vsActionOutVerifyEstampMiddleware, EmployeeMiddleware)
       .forRoutes('api/bannayuu/calculate/cal-all');
   }
 }

@@ -278,4 +278,7 @@ export class ErrMessageUtilsTH{
 
     errCalParkingMasterNotInBase = 'ไม่พบ Calculate master ในระบบ กรุณาตรวจสอบการตั้งค่า'
     
+    errPromotionNotInDataBase = 'ไม่พบส่วนลดในระบบ'
+    errPromotionCodeNotFound = 'กรุณากรอกโค้ดส่วนลด'
+    errPromotionCodeProhitbitSpecial = 'โค้ดส่วนลดห้ามมีอักขระพิเศษ หรือช่องว่าง'
 }

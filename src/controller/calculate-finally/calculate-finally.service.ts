@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class CalculateFinallyService {
 
-    async calculateParkingPriceFinally(getSubObj: any) {
+    async calculateParkingPriceFinally(getSubObj: any, getPromotiion: any) {
         const CalculateObj = getSubObj.map(item => item.calculate_object)
 
         const getCalculateUnitsSplitDayPromise = await CalculateObj.map(async item => {
@@ -21,13 +21,21 @@ export class CalculateFinallyService {
         const getCalculateSplitDayUnits = await Promise.all(getCalculateUnitsSplitDayPromise);
         //---------------------Summary all days
         const getSummaryAllDays = await this.calculateParkingSummaryAllDays(getCalculateSplitDayUnits);
-        console.log('getSummaryAllDays: ' + JSON.stringify(getSummaryAllDays))
+        console.log('getSummaryAllDays: ' + JSON.stringify(getSummaryAllDays));
+        //---------------------Get Over night fines all
         const getSummaryOverNights = await this.summaryOverNightAll(getSubObj);
-        console.log('getSummaryOverNights : ' + getSummaryOverNights)
+        console.log('getSummaryOverNights : ' + getSummaryOverNights);
+        //---------------------Cal discount parking
+        const summaryAndDiscount = this.summaryAndDiscount(getSummaryAllDays, getPromotiion)
+        console.log('summaryAndDiscount : ' + JSON.stringify(summaryAndDiscount));
         return {
             ...getSummaryAllDays
+            , minutes_discount: summaryAndDiscount.minutes_discount
+            , parking_discount: summaryAndDiscount.parking_discount
+            , sum_parking_total_after_discount: summaryAndDiscount.sum_parking_total_after_discount
             , sum_overnight_fine_amount: getSummaryOverNights
-            , sum_total: getSummaryAllDays.sum_parking_total + getSummaryOverNights
+            , sum_total: summaryAndDiscount.sum_parking_total_after_discount + getSummaryOverNights
+            , promotion_object: getPromotiion,
         };
     }
 
@@ -149,5 +157,17 @@ export class CalculateFinallyService {
 
     async summaryOverNightSplitDay(summaryObj: any, inputObj: any) {
         return summaryObj + inputObj;
+    }
+
+    summaryAndDiscount(SummaryAllDays: any, getPromotiion: any) {
+        const parking_discount = getPromotiion ? getPromotiion.promotion_parking_discount_value : 0;
+        const minutes_discount = getPromotiion ? getPromotiion.promotion_minutes_discount_value : 0;
+        const total = SummaryAllDays.sum_parking_total - parking_discount;
+        return {
+            ...SummaryAllDays,
+            sum_parking_total_after_discount: total > 0 ? total : 0,
+            parking_discount,
+            minutes_discount,
+        }
     }
 }

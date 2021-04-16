@@ -3,18 +3,18 @@ import * as moment from 'moment';
 import { LoadSettingLocalUtils } from 'src/utils/load_setting_local.utils';
 @Injectable()
 export class CalTimeDiffService {
-    async calTimeDiff(calConfigObj: any, body: any, checkDiscountMinute: boolean) {
+    async calTimeDiff(calConfigObj: any, body: any) {
         const getCalTimeDiffPromise = await calConfigObj.map(async item => {
-            return await this.calculate(item, checkDiscountMinute);
+            return await this.calculate(item);
         })
         const getCalTimeDiff = await Promise.all(getCalTimeDiffPromise);
         return getCalTimeDiff;
     }
 
-    async calculate(calConfigObj: any, checkDiscountMinute: boolean) {
-        const timeDiffBeforResult = await this.calDiffToMinutes(calConfigObj.timestart, calConfigObj.timeend, checkDiscountMinute);
-        const timeDiffAfterResult = await this.calDiffToMinutes(calConfigObj.calculate_object.newtimestart, calConfigObj.calculate_object.newtimeend, checkDiscountMinute);
-        const calDiffFormHeader = await this.calDiffFormCalculateParkingHeader(calConfigObj, checkDiscountMinute);
+    async calculate(calConfigObj: any) {
+        const timeDiffBeforResult = await this.calDiffToMinutes(calConfigObj.timestart, calConfigObj.timeend);
+        const timeDiffAfterResult = await this.calDiffToMinutes(calConfigObj.calculate_object.newtimestart, calConfigObj.calculate_object.newtimeend);
+        const calDiffFormHeader = await this.calDiffFormCalculateParkingHeader(calConfigObj);
         const calDiffFromHeaderToSub = {
             newtimestart: calConfigObj.calculate_object.newtimestart,
             newtimeend: calConfigObj.calculate_object.newtimeend,
@@ -30,12 +30,12 @@ export class CalTimeDiffService {
         return calDiffFromHeaderToSub;
     }
 
-    async calDiffToMinutes(timeStart: string, timeEnd: string, checkDiscountMinute: boolean) {
+    async calDiffToMinutes(timeStart: string, timeEnd: string) {
         const timeDiff = moment.duration(moment(timeEnd, 'HH:mm a').diff(moment(timeStart, 'HH:mm a')));
         return timeDiff.asMinutes();
     }
 
-    async calDiffFormCalculateParkingHeader(calConfigObj: any, checkDiscountMinute: boolean) {
+    async calDiffFormCalculateParkingHeader(calConfigObj: any) {
         if (calConfigObj.cph_object) {
             let newTimeStart, newTimeStop;
             const calDiffHeaderPromise = await calConfigObj.cph_object.map(async item => {
@@ -62,7 +62,7 @@ export class CalTimeDiffService {
                     newTimeStart = "00:00:00"
                     newTimeStop = "00:00:00"
                 }
-                return this.calDiffToMinutes(newTimeStart, newTimeStop, checkDiscountMinute);
+                return this.calDiffToMinutes(newTimeStart, newTimeStop);
             });
             const calDiffHeader = await Promise.all(calDiffHeaderPromise);
             const calDiffMainZone = this.calDiffMainTime(calDiffHeader, calConfigObj)

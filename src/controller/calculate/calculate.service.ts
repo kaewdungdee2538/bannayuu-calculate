@@ -10,6 +10,8 @@ import { LoadSettingLocalUtils } from 'src/utils/load_setting_local.utils';
 import { GetCalConfigSubService } from '../get-cal-config-sub/get-cal-config-sub.service';
 import { CalculateFinallyService } from '../calculate-finally/calculate-finally.service';
 import { CalTimeDiffService } from '../cal-time-diff/cal-time-diff.service';
+import { PromotionService } from '../promotion/promotion.service';
+import { InsertLogService } from 'src/insert-log/insert-log.service';
 
 @Injectable()
 export class CalculateService {
@@ -22,7 +24,9 @@ export class CalculateService {
         private getCalConfigSub: GetCalConfigSubService,
         private localSettingLocalUtils: LoadSettingLocalUtils,
         private calculateFinallyService: CalculateFinallyService,
-        private calTimeDiffService: CalTimeDiffService
+        private calTimeDiffService: CalTimeDiffService,
+        private promotionService: PromotionService,
+        private insertLogService: InsertLogService,
     ) { }
     async calculateParking(body: any) {
         const start_date = body.start_date;
@@ -38,22 +42,27 @@ export class CalculateService {
                 },
                 200);
         else {
+            //-----------------------Get Promotion
+            const getPromotiion = await this.promotionService.getPromotion(body);
+            //-----------------------Split Date
             const DateArray = resGetDateArray.data.dateArray;
-            const getMasterDay = await this.checkMasterDay(DateArray, body)
+            //-----------------------Get master calculate
+            const getMasterDay = await this.checkMasterDay(DateArray, body, getPromotiion)
             //------------------------ตรวจสอบว่า แยกลดเวลาจอดออกเป็นวันหรือไม่
-            const checkDiscountMinute = await this.localSettingLocalUtils.getCalculateSplitDiscountMinuteConfig(body.company_id);
+            const checkDiscountMinuteExpect = await this.localSettingLocalUtils.getCalculateSplitDiscountMinuteConfig(body.company_id);
             //------------------------คำนวณลดเวลาจอดฟรี
-            const getNewCheckExceptTimePerDay = await this.checkExceptTimePerDay(getMasterDay, body, checkDiscountMinute);
-            const getCalHeader = await this.getCalConfigHeader.calHeader(getNewCheckExceptTimePerDay, body, checkDiscountMinute);
+            const getNewCheckExceptTimePerDay = await this.checkExceptTimePerDay(getMasterDay, body, checkDiscountMinuteExpect, getPromotiion);
+            const getCalHeader = await this.getCalConfigHeader.calHeader(getNewCheckExceptTimePerDay, body);
             //--------------------คำนวณหาค่าจอดจาก Sub หรือคำนวณหาจากช่วงที่อยู่นอกเหนือจาก Sub ด้วย
             const calFromSub = await this.getCalConfigSub.calculateSub(getCalHeader, body);
             //--------------------คำนวณรวมค่าจอดทั้งหมด
-            const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub);
+            const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub, getPromotiion);
             //--------------------คำนวณเวลาจอดทั้งหมด
             const minuteTimeDiffAll = await this.calTimeDiffService.calTimeDiffFormDateStartToDateEnd(start_date, end_date);
-            return {
+            //----------------------------------
+            const calculateFinallyObj = {
                 summary_data: {
-                    cartype_id:body.cartype_id,
+                    cartype_id: body.cartype_id,
                     start_date,
                     end_date,
                     sum_interval: minuteTimeDiffAll,
@@ -61,17 +70,36 @@ export class CalculateService {
                 },
                 daily_data: [...calFromSub],
             }
+            //----------------------Insert Log
+            const insertLog = await this.insertLogService.insertCalculate(body, calculateFinallyObj);
+            if (insertLog) throw new StatusException({
+                error: insertLog,
+                result: null,
+                message: this.errMessageUtilsTh.messageProcessFail,
+                statusCode: 200
+            }, 200);
+            return calculateFinallyObj;
         }
     }
 
-    async checkMasterDay(DateArray: any, body: any) {
+    async checkMasterDay(DateArray: any, body: any, getPromotiion: any) {
+
         const checkMasterDayPromise = await DateArray.map(async item => {
+            //------------------ถ้าหากส่วนลดมีการเปลี่ยนเลทการคำนวณใหม่
+            if (getPromotiion) {
+                if (getPromotiion.promotion_new_calculate_status.toUpperCase() === "Y") {
+                    const dayTypeMaster = { ...item, day_type: "NEWCALCULATE", cpm_id: getPromotiion.promotion_new_cpm_id };
+                    const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
+                    return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
+                }
+            }
+            //-----------------ตรวจสอบว่าอยู่ใน zone หรือไม่
             const checkMasterDateZone = await this.getCalConfigmaster.checkMasterDateZone(item, body);
             console.log('checkMasterDateZone : ' + checkMasterDateZone)
             if (checkMasterDateZone) {
                 const dayTypeMaster = { ...item, day_type: "SPECIAL" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
-                return { ...dayTypeMaster, cpm_object }
+                return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
             }
             //----------check holiday
             const checkMasterHoliday = await this.getCalConfigmaster.checkMasterHoliday(item, body);
@@ -79,7 +107,7 @@ export class CalculateService {
             if (checkMasterHoliday) {
                 const dayTypeMaster = { ...item, day_type: "HOLIDAY" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
-                return { ...dayTypeMaster, cpm_object }
+                return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
             }
             //----------check weekend
             const checkMasterWeekend = await this.getCalConfigmaster.checkMasterWeekend(item);
@@ -87,32 +115,37 @@ export class CalculateService {
             if (checkMasterWeekend) {
                 const dayTypeMaster = { ...item, day_type: "WEEKEND" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
-                return { ...dayTypeMaster, cpm_object }
+                return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
             }
             //----------day is normal
             const dayTypeMaster = { ...item, day_type: "N" };
             const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
-            return { ...dayTypeMaster, cpm_object }
+            return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
         })
         const checkMasterDay = await Promise.all(checkMasterDayPromise);
         return checkMasterDay;
     }
 
-    async checkExceptTimePerDay(getMasterDay: any, body: any, checkDiscountMinute: boolean) {
+    async checkExceptTimePerDay(getMasterDay: any, body: any, checkDiscountMinuteExpectDay: boolean, getPromotiion: any) {
         const getHoursFree = getMasterDay[0].cpm_object.cpm_time_for_free.hours ? getMasterDay[0].cpm_object.cpm_time_for_free.hours : 0;
         const getMinutesFree = getMasterDay[0].cpm_object.cpm_time_for_free.minutes ? getMasterDay[0].cpm_object.cpm_time_for_free.minutes : 0
         let minute_free = getHoursFree * 60 + getMinutesFree;
+        //---------------------------Promotion discount minute
+        let minute_discount = getPromotiion ? getPromotiion.promotion_minutes_discount_value : 0;
+
         //เวลาออกล่าสุด ลบด้วย เวลาจอดฟรี
         let newMasterDay = [];
         // console.log('getMasterDay : ' + JSON.stringify(getMasterDay))
         for (let num = getMasterDay.length - 1; num >= 0; num--) {
+            //---------เพิ่มส่วนลดนาทีเข้าไปก่อน
+            minute_free = minute_free + minute_discount;
             const dateStartStr = `${getMasterDay[num].dateend} 00:00:00`
             const dateEndStr = `${getMasterDay[num].dateend} ${getMasterDay[num].timeend}`
             const duration = await this.getDurationDateTime(dateStartStr, dateEndStr);
             console.log('duration : ' + duration)
             console.log('minute_free : ' + minute_free)
             //-----------กรณีไม่แยกยกเว้นเวลาจอดออกเป็นวัน จะลดเวลาจอดโดยรวมก่อน
-            if (!checkDiscountMinute) {
+            if (!checkDiscountMinuteExpectDay) {
                 //----------------ถ้าคำนวณแล้วจำนวนนาทีที่เหลือในวันนั้น น้อยกว่า ส่วนลดจอดฟรี
                 if (duration < minute_free) {
                     const newTime = await this.setNewDatetimeAfterDisMinute(duration, dateEndStr);
@@ -151,6 +184,8 @@ export class CalculateService {
                     newMinuteForFree = duration
                 else
                     newMinuteForFree = minute_free
+                //--------หักลบส่วนลดนาทีออกไป เพราะไม่ให้ลดนาทีถูกนำไปคำนวณทุกวัน
+                minute_discount = 0;
                 const newTime = await this.setNewDatetimeAfterDisMinute(newMinuteForFree, dateEndStr);
                 newMasterDay.unshift({
                     ...getMasterDay[num],

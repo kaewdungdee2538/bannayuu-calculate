@@ -12,11 +12,12 @@ export class CalOvernightService {
     async calculateOverNight(calConfigObj: any) {
         let day_runnung = 1;
         const calOverNightPromise = calConfigObj.map(async item => {
-            day_runnung++;
             if (await this.checkOverNight(item)) {
                 const newOverNight = this.calNewTimeForOverNight(item, calConfigObj.length, day_runnung);
+                day_runnung++;
                 return newOverNight;
             } else {
+                day_runnung++;
                 return { 
                     ...item, 
                     calculate_object: {

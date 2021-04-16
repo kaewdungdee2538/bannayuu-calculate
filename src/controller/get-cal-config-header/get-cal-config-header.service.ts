@@ -13,15 +13,15 @@ export class GetCalConfigHeaderService {
         private calTimeDiffService:CalTimeDiffService,
     ) { }
 
-    async calHeader(cpm_object: any, body: any,checkDiscountMinute:boolean) {
+    async calHeader(cpm_object: any, body: any) {
         const getHeaderConfigPromise = await cpm_object.map(async item => {
            const cph_object = await this.getCalHeaderConfig(item, body)
            return {...item,cph_object}
         })
         const getHeaderConfig = await Promise.all(getHeaderConfigPromise);
         const getOverNight = await this.calOverNightService.calculateOverNight(getHeaderConfig);
-        console.log('getOverNight : '+JSON.stringify(getOverNight));
-        const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight,body,checkDiscountMinute);
+        // console.log('getOverNight : '+JSON.stringify(getOverNight));
+        const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight,body);
         // const calSub = await 
         return calTimeDiff;
     }
