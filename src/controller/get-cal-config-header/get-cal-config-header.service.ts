@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { dbConnection } from 'src/pg.database/pg.database';
+import { StatusException } from 'src/utils/callback.status';
 import { ErrMessageUtilsTH } from 'src/utils/err_message_th.utils';
 import { CalOvernightService } from '../cal-overnight/cal-overnight.service';
 import { CalTimeDiffService } from '../cal-time-diff/cal-time-diff.service';
@@ -9,19 +10,29 @@ export class GetCalConfigHeaderService {
     constructor(
         private readonly errMessageUtilsTh: ErrMessageUtilsTH,
         private readonly dbconnecttion: dbConnection,
-        private calOverNightService:CalOvernightService,
-        private calTimeDiffService:CalTimeDiffService,
+        private calOverNightService: CalOvernightService,
+        private calTimeDiffService: CalTimeDiffService,
     ) { }
 
     async calHeader(cpm_object: any, body: any) {
         const getHeaderConfigPromise = await cpm_object.map(async item => {
-           const cph_object = await this.getCalHeaderConfig(item, body)
-           return {...item,cph_object}
+            const cph_object = await this.getCalHeaderConfig(item, body)
+            if (cph_object)
+                return { ...item, cph_object }
+            return null;
         })
+        //------------------get header zone
         const getHeaderConfig = await Promise.all(getHeaderConfigPromise);
+        console.log(`getHeaderConfigZone : ${JSON.stringify(getHeaderConfig)}`)
+        if (!getHeaderConfig[0]) throw new StatusException({
+            error: this.errMessageUtilsTh.messageProcessFail
+            , result: null
+            , message: this.errMessageUtilsTh.errCalParkingHeaderMainNotSet
+            , statusCode: 200
+        }, 200)
         const getOverNight = await this.calOverNightService.calculateOverNight(getHeaderConfig);
         // console.log('getOverNight : '+JSON.stringify(getOverNight));
-        const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight,body);
+        const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight, body);
         // const calSub = await 
         return calTimeDiff;
     }

@@ -46,7 +46,7 @@ export class CalculateService {
             const getPromotiion = await this.promotionService.getPromotion(body);
             //-----------------------Split Date
             const DateArray = resGetDateArray.data.dateArray;
-            console.log('DateArray : '+JSON.stringify(DateArray))
+            console.log('DateArray : ' + JSON.stringify(DateArray))
             //-----------------------Get master calculate
             const getMasterDay = await this.checkMasterDay(DateArray, body, getPromotiion)
             //------------------------ตรวจสอบว่า แยกลดเวลาจอดออกเป็นวันหรือไม่
@@ -60,6 +60,9 @@ export class CalculateService {
             const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub, getPromotiion);
             //--------------------คำนวณเวลาจอดทั้งหมด
             const minuteTimeDiffAll = await this.calTimeDiffService.calTimeDiffFormDateStartToDateEnd(start_date, end_date);
+            //--------------------Convert interval to text format
+            const minutesTimeDiffAllIsTextFormat = this.calTimeDiffService.convertTimeDiffToText(minuteTimeDiffAll);
+            const minutesTimeDiffAfterDiscountIsTextFormat = this.calTimeDiffService.convertTimeDiffToText(calParkingFinally.sum_interval_before_cal)
             //----------------------------------Object values for return
             const calculateFinallyObj = {
                 summary_data: {
@@ -67,19 +70,26 @@ export class CalculateService {
                     start_date,
                     end_date,
                     sum_interval: minuteTimeDiffAll,
+                    sum_interval_text: minutesTimeDiffAllIsTextFormat,
+                    sum_interval_after_discount_minute: minutesTimeDiffAfterDiscountIsTextFormat,
                     ...calParkingFinally,
                 },
                 daily_data: [...calFromSub],
             }
             //----------------------Insert Log
-            const insertLog = await this.insertLogService.insertCalculate(body, calculateFinallyObj);
-            if (insertLog) throw new StatusException({
-                error: insertLog,
+            const isInsertLogFail = await this.insertLogService.insertCalculate(body, calculateFinallyObj);
+            if (isInsertLogFail) throw new StatusException({
+                error: isInsertLogFail,
                 result: null,
                 message: this.errMessageUtilsTh.messageProcessFail,
                 statusCode: 200
             }, 200);
-            return calculateFinallyObj;
+            throw new StatusException({
+                error: null,
+                result: calculateFinallyObj,
+                message: this.errMessageUtilsTh.messageSuccess,
+                statusCode: 200
+            }, 200);
         }
     }
 

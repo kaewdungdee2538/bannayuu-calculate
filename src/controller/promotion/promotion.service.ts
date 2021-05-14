@@ -10,18 +10,21 @@ export class PromotionService {
         private readonly dbconnecttion: dbConnection,
     ) { }
     async getPromotion(body: any) {
-        if (!body.promotion_code)
+        if (!body.promotion_code && body.estamp_flag.toUpperCase() === "N")
             return null;
-        const getPromotionObj = await this.getPromotionInBase(body);
-        if (!getPromotionObj) throw new StatusException(
-            {
-                error: this.errMessageUtilsTh.messageProcessFail,
-                result: null,
-                message: this.errMessageUtilsTh.errPromotionNotInDataBase,
-                statusCode: 200,
-            },
-            200);
-        return getPromotionObj;
+        if (body.promotion_code) {
+            const getPromotionObj = await this.getPromotionInBase(body);
+            if (!getPromotionObj) throw new StatusException(
+                {
+                    error: this.errMessageUtilsTh.messageProcessFail,
+                    result: null,
+                    message: this.errMessageUtilsTh.errPromotionNotInDataBase,
+                    statusCode: 200,
+                },
+                200);
+            return getPromotionObj;
+        }
+        return await this.getPromotionForEstampInBase(body);
     }
 
     async getPromotionInBase(body: any) {
@@ -40,6 +43,28 @@ export class PromotionService {
         const query = {
             text: sql,
             values: [company_id, promotion_code]
+        }
+        const res = await this.dbconnecttion.getPgData(query);
+        if (res.error || res.result.length === 0)
+            return null;
+        else return res.result[0];
+    }
+
+    async getPromotionForEstampInBase(body: any) {
+        const company_id = body.company_id;
+        let sql = `select promotion_id,promotion_code,promotion_name_th,promotion_name_en
+        ,promotion_new_calculate_status,promotion_new_cpm_id,promotion_minutes_discount_value,promotion_parking_discount_value
+        ,promotion_status 
+        from m_promotion
+        where promotion_status = 'Y'
+        and delete_flag = 'N' and cancel_flag = 'N'
+        and for_estamp = 'Y'
+        and company_id = $1
+        limit 1
+        ;`
+        const query = {
+            text: sql,
+            values: [company_id]
         }
         const res = await this.dbconnecttion.getPgData(query);
         if (res.error || res.result.length === 0)

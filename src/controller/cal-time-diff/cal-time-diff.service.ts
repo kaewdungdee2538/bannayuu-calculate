@@ -141,4 +141,13 @@ export class CalTimeDiffService {
         console.log(`sumInterval : ${Math.ceil(diffTime.asMinutes())}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`);
         return Math.ceil(diffTime.asMinutes());
     }
+
+    convertTimeDiffToText(intervalInput:number){
+        const hours = Math.floor(intervalInput/60)
+        const minutes = intervalInput%60
+        const hoursText = hours > 0 ? `${hours} ชั่วโมง ` : "";
+        const minutesText = `${minutes} นาที`;
+        console.log(`hours : ${hours}, minutes : ${minutes}`)
+        return `${hoursText}${minutesText}`
+    }
 }

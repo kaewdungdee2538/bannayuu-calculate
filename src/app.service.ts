@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
+  count:number = 0;
   getHello(): string {
-    return 'Hello World!2222';
+    this.count++;
+    return 'Hello World!2222'+this.count;
   }
 }
