@@ -130,13 +130,15 @@ export class GetCalConfigSubService {
         const cph_id = inPutObj.cph_id;
         const company_id = body.company_id;
         const minuteInterval = inPutObj.minutes;
+        console.log('minuteInterval : '+minuteInterval)
+        console.log('inPutObj : '+JSON.stringify(inPutObj))
         let sql = `select cps_id
         from m_calculate_parking_sub mcps
         where mcps.delete_flag = 'N'
         and cps_status = 'Y'
         and cph_id = $1
         and mcps.company_id = $2
-        and $3 between mcps.cps_start_interval and mcps.cps_stop_interval 
+        and interval '$3 minutes' between mcps.cps_start_interval and mcps.cps_stop_interval 
         order by line_no 
         ;`
         const query = {

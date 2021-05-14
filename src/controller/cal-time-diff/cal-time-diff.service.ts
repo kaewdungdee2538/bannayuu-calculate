@@ -15,12 +15,13 @@ export class CalTimeDiffService {
         const timeDiffBeforResult = await this.calDiffToMinutes(calConfigObj.timestart, calConfigObj.timeend);
         const timeDiffAfterResult = await this.calDiffToMinutes(calConfigObj.calculate_object.newtimestart, calConfigObj.calculate_object.newtimeend);
         const calDiffFormHeader = await this.calDiffFormCalculateParkingHeader(calConfigObj);
+        
         const calDiffFromHeaderToSub = {
             newtimestart: calConfigObj.calculate_object.newtimestart,
             newtimeend: calConfigObj.calculate_object.newtimeend,
             overnight_fine_amount: calConfigObj.calculate_object.overnight_fine_amount,
             ...calConfigObj,
-            calculate_object:{
+            calculate_object: {
                 ...calConfigObj.calculate_object,
                 time_diff_before_overnight: timeDiffBeforResult,
                 time_diff_after_overnight: timeDiffAfterResult,
@@ -30,19 +31,15 @@ export class CalTimeDiffService {
         return calDiffFromHeaderToSub;
     }
 
-    async calDiffToMinutes(timeStart: string, timeEnd: string) {
-        const timeDiff = moment.duration(moment(timeEnd, 'HH:mm a').diff(moment(timeStart, 'HH:mm a')));
-        return timeDiff.asMinutes();
-    }
 
     async calDiffFormCalculateParkingHeader(calConfigObj: any) {
         if (calConfigObj.cph_object) {
             let newTimeStart, newTimeStop;
             const calDiffHeaderPromise = await calConfigObj.cph_object.map(async item => {
-                const timeStart = moment(calConfigObj.calculate_object.newtimestart, 'HH:mm a')
-                const timeEnd = moment(calConfigObj.calculate_object.newtimeend, 'HH:mm a')
-                const timeZoneStart = moment(item.time_zone_start, 'HH:mm a')
-                const timeZoneStop = moment(item.time_zone_stop, 'HH:mm a')
+                const timeStart = moment(calConfigObj.calculate_object.newtimestart, 'HH:mm:ss')
+                const timeEnd = moment(calConfigObj.calculate_object.newtimeend, 'HH:mm:ss')
+                const timeZoneStart = moment(item.time_zone_start, 'HH:mm:ss')
+                const timeZoneStop = moment(item.time_zone_stop, 'HH:mm:ss')
                 if (timeStart > timeZoneStart && timeEnd < timeZoneStop && timeEnd > timeZoneStart) {
                     newTimeStart = timeStart;
                     newTimeStop = timeEnd;
@@ -62,6 +59,7 @@ export class CalTimeDiffService {
                     newTimeStart = "00:00:00"
                     newTimeStop = "00:00:00"
                 }
+                console.log(`calDiffFormCalculateParkingHeader : ${newTimeStart} , ${newTimeStop}`)
                 return this.calDiffToMinutes(newTimeStart, newTimeStop);
             });
             const calDiffHeader = await Promise.all(calDiffHeaderPromise);
@@ -130,10 +128,17 @@ export class CalTimeDiffService {
         };
     }
 
-    async calTimeDiffFormDateStartToDateEnd(dateStart:string,dateEnd:string){
+    async calDiffToMinutes(timeStart: string, timeEnd: string) {
+        const timeDiff = moment.duration(moment(timeEnd, 'HH:mm:ss').diff(moment(timeStart, 'HH:mm:ss')));
+        console.log(`calMinutesDiff : ${Math.ceil(timeDiff.asMinutes())}, timeStart : ${timeStart},timeEnd : ${timeEnd}`)
+        return Math.ceil(timeDiff.asMinutes());
+    }
+
+    async calTimeDiffFormDateStartToDateEnd(dateStart: string, dateEnd: string) {
         const start = moment(dateStart);
         const end = moment(dateEnd);
         const diffTime = moment.duration(end.diff(start));
-        return diffTime.asMinutes();
+        console.log(`sumInterval : ${Math.ceil(diffTime.asMinutes())}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`);
+        return Math.ceil(diffTime.asMinutes());
     }
 }

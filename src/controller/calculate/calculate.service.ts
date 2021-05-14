@@ -46,6 +46,7 @@ export class CalculateService {
             const getPromotiion = await this.promotionService.getPromotion(body);
             //-----------------------Split Date
             const DateArray = resGetDateArray.data.dateArray;
+            console.log('DateArray : '+JSON.stringify(DateArray))
             //-----------------------Get master calculate
             const getMasterDay = await this.checkMasterDay(DateArray, body, getPromotiion)
             //------------------------ตรวจสอบว่า แยกลดเวลาจอดออกเป็นวันหรือไม่
@@ -59,7 +60,7 @@ export class CalculateService {
             const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub, getPromotiion);
             //--------------------คำนวณเวลาจอดทั้งหมด
             const minuteTimeDiffAll = await this.calTimeDiffService.calTimeDiffFormDateStartToDateEnd(start_date, end_date);
-            //----------------------------------
+            //----------------------------------Object values for return
             const calculateFinallyObj = {
                 summary_data: {
                     cartype_id: body.cartype_id,

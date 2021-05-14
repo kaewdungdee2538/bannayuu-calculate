@@ -13,7 +13,7 @@ export class SplitDateService {
 
 
     async splitDate(date_start: string, date_end: string) {
-        console.log('date_start' + date_start + 'date_end' + date_end)
+        console.log('date_start : ' + date_start + ', date_end : ' + date_end)
         const middleware = await this.splitDateMiddleware(date_start, date_end);
         if (middleware) {
             console.log('middleware date split : ' + middleware);
@@ -26,8 +26,8 @@ export class SplitDateService {
             let dateArray = []
             const dateDiff = moment(date_end,'YYYY-MM-DD').diff(moment(date_start,'YYYY-MM-DD'))
             const dateCount = moment(dateDiff).dayOfYear()
-            console.log('dateCount : '+dateCount)
             if (dateCount > 1) {
+                console.log('datecount more than 1 day')
                 let dateCurrent = moment(date_start);
                 for (let num = 1; num <= dateCount; num++) {
                     if (num === 1) {
@@ -59,18 +59,18 @@ export class SplitDateService {
                     dateCurrent = moment(dateCurrent).add(1, 'day').set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
                 }
             } else {
+                console.log('datecount equal 1 day')
                 dateArray = [
                     {
                         start: moment(date_start).format('YYYY-MM-DD HH:mm:ss'),
                         datestart: moment(date_start).format('YYYY-MM-DD'),
                         timestart: moment(date_start).format('HH:mm:ss'),
-                        end: moment(date_start).format('YYYY-MM-DD HH:mm:ss'),
-                        dateend: moment(date_start).format('YYYY-MM-DD'),
-                        timeend: moment(date_start).format('HH:mm:ss')
+                        end: moment(date_end).format('YYYY-MM-DD HH:mm:ss'),
+                        dateend: moment(date_end).format('YYYY-MM-DD'),
+                        timeend: moment(date_end).format('HH:mm:ss')
                     }
                 ]
             }
-
             console.log('dateCount : ' + dateCount);
             // console.log('dateArray : ' + JSON.stringify(dateArray));
             return {
