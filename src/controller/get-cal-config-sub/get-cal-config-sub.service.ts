@@ -62,6 +62,7 @@ export class GetCalConfigSubService {
             return result;
         } else {
             const result = await this.getCalSubConfigOverInBase(inPutObj, body);
+            console.log(`getCalSubConfigOverInBase : ${JSON.stringify(result)}`)
             return result;
         }
     }
@@ -95,6 +96,7 @@ export class GetCalConfigSubService {
     }
 
     async getCalSubConfigOverInBase(inPutObj: any, body: any) {
+        console.log(`minuteInterval : ${inPutObj.minutes}`)
         const cph_id = inPutObj.cph_id;
         const minuteInterval = inPutObj.minutes;
         const company_id = body.company_id;
@@ -112,13 +114,13 @@ export class GetCalConfigSubService {
         and mcps.cps_status = 'Y'
         and mcps.cph_id = $1
         and mcps.company_id = $2
-        and mcps.cps_stop_interval <= $3
+        and mcps.cps_stop_interval <= interval '${minuteInterval} minutes'
         order by mcps.line_no DESC
         limit 1
         ;`
         const query = {
             text: sql,
-            values: [cph_id, company_id, minuteInterval]
+            values: [cph_id, company_id]
         }
         const res = await this.dbconnecttion.getPgData(query);
         if (res.error || res.result.length === 0)
@@ -138,12 +140,12 @@ export class GetCalConfigSubService {
         and cps_status = 'Y'
         and cph_id = $1
         and mcps.company_id = $2
-        and interval '$3 minutes' between mcps.cps_start_interval and mcps.cps_stop_interval 
+        and interval '${minuteInterval} minutes' between mcps.cps_start_interval and mcps.cps_stop_interval 
         order by line_no 
         ;`
         const query = {
             text: sql,
-            values: [cph_id, company_id, minuteInterval]
+            values: [cph_id, company_id]
         }
         const res = await this.dbconnecttion.getPgData(query);
         if (res.error || res.result.length === 0)
