@@ -12,7 +12,10 @@ export class CalTimeDiffService {
     }
 
     async calculate(calConfigObj: any) {
+        console.log(calConfigObj)
         const timeDiffBeforResult = await this.calDiffToMinutes(calConfigObj.timestart, calConfigObj.timeend);
+        console.log(calConfigObj.calculate_object.newtimestart);
+        console.log(calConfigObj.calculate_object.newtimeend);
         const timeDiffAfterResult = await this.calDiffToMinutes(calConfigObj.calculate_object.newtimestart, calConfigObj.calculate_object.newtimeend);
         const calDiffFormHeader = await this.calDiffFormCalculateParkingHeader(calConfigObj);
         
@@ -130,21 +133,27 @@ export class CalTimeDiffService {
 
     async calDiffToMinutes(timeStart: string, timeEnd: string) {
         const timeDiff = moment.duration(moment(timeEnd, 'HH:mm:ss').diff(moment(timeStart, 'HH:mm:ss')));
-        console.log(`calMinutesDiff : ${Math.ceil(timeDiff.asMinutes())}, timeStart : ${timeStart},timeEnd : ${timeEnd}`)
-        return Math.ceil(timeDiff.asMinutes());
+        const timeDiffReturn = Math.ceil(timeDiff.asMinutes());
+        const minutesDiff = timeDiffReturn > 0 ? timeDiffReturn : 0;
+        console.log(`calMinutesDiff : ${minutesDiff}, timeStart : ${timeStart},timeEnd : ${timeEnd}`)
+        return minutesDiff;
     }
 
     async calTimeDiffFormDateStartToDateEnd(dateStart: string, dateEnd: string) {
         const start = moment(dateStart);
         const end = moment(dateEnd);
         const diffTime = moment.duration(end.diff(start));
-        console.log(`sumInterval : ${Math.ceil(diffTime.asMinutes())}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`);
-        return Math.ceil(diffTime.asMinutes());
+        const timeDiffReturn = Math.ceil(diffTime.asMinutes());
+        const minuteDiff = timeDiffReturn > 0 ? timeDiffReturn : 0;
+        console.log(`sumInterval : ${minuteDiff}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`);
+        return minuteDiff;
     }
 
     convertTimeDiffToText(intervalInput:number){
+        let newInterval = intervalInput ? intervalInput : 0;
         const days = Math.floor(intervalInput/1440);
-        const hours = Math.floor(intervalInput/60)
+        newInterval = Math.floor(intervalInput % 1440);
+        const hours = Math.floor(newInterval/60)
         const minutes = intervalInput%60
         const daysText = days > 0 ? `${days} วัน ` : "";
         const hoursText = hours > 0 ? `${hours} ชั่วโมง ` : "";

@@ -78,15 +78,23 @@ export class CalculateService {
             }
             //----------------------Insert Log
             const isInsertLogFail = await this.insertLogService.insertCalculate(body, calculateFinallyObj);
-            if (isInsertLogFail) throw new StatusException({
+            if (!isInsertLogFail) throw new StatusException({
                 error: isInsertLogFail,
                 result: null,
                 message: this.errMessageUtilsTh.messageProcessFail,
                 statusCode: 200
             }, 200);
+            //----------------------Is success and finish return
+            const calculateFinishObj = {
+                summary_data: {
+                    tcpl_id: isInsertLogFail.tcpl_id,
+                    ...calculateFinallyObj.summary_data
+                },
+                daily_data: [...calculateFinallyObj.daily_data]
+            }
             throw new StatusException({
                 error: null,
-                result: calculateFinallyObj,
+                result: calculateFinishObj,
                 message: this.errMessageUtilsTh.messageSuccess,
                 statusCode: 200
             }, 200);

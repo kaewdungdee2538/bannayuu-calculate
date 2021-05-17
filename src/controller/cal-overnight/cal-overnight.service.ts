@@ -9,6 +9,8 @@ export class CalOvernightService {
         private readonly dbconnecttion: dbConnection,
     ) { }
 
+    overnight_stop_global: string = null;
+
     async calculateOverNight(calConfigObj: any) {
         let day_runnung = 1;
         const calOverNightPromise = calConfigObj.map(async item => {
@@ -18,31 +20,32 @@ export class CalOvernightService {
                 return newOverNight;
             } else {
                 day_runnung++;
-                return { 
-                    ...item, 
+                return {
+                    ...item,
                     calculate_object: {
                         newtimestart: this.overnight_stop_global ? this.overnight_stop_global : item.timestart,//วันข้ามคืนก่อนหน้า
                         newtimeend: item.timeend,
                         overnight_fine_amount: 0
                     }
-    
+
                 }
             }
         })
         const calOverNight = await Promise.all(calOverNightPromise)
+        //------------------------Reset value
+        day_runnung = 1;
+        this.overnight_stop_global = null;
         return calOverNight;
     }
 
     async checkOverNight(calConfigObj: any) {
-        const timeEndOvernight = moment(calConfigObj.cpm_object.cpm_overnight_start,'HH;mm:ss')
-        const timeEnd = moment(calConfigObj.timeend,'HH:mm:ss');
-        
+        const timeEndOvernight = moment(calConfigObj.cpm_object.cpm_overnight_start, 'HH;mm:ss')
+        const timeEnd = moment(calConfigObj.timeend, 'HH:mm:ss');
+        console.log(`timeEndOvernight : ${timeEndOvernight}`)
         if (calConfigObj.cpm_object.cpm_overnight_status.toUpperCase() === 'Y' && timeEndOvernight <= timeEnd)
             return true;
         return false;
     }
-
-    overnight_stop_global: string = null;
 
     calNewTimeForOverNight(calConfigObj: any, dayCount: number, dayRunnung: number) {
         let newOverNight = null;
@@ -63,21 +66,21 @@ export class CalOvernightService {
                 }
             }
 
-        } else if (dayRunnung > 1) {
-            newOverNight = {
-                ...calConfigObj,
-                calculate_object: {
-                    newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
-                    newtimeend: calConfigObj.cpm_object.cpm_overnight_start,
-                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
-                }
-            }
         } else if (dayCount === 1) {
             newOverNight = {
                 ...calConfigObj,
                 calculate_object: {
                     newtimestart: calConfigObj.timestart,
                     newtimeend: calConfigObj.timeend,
+                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+                }
+            }
+        } else if (dayRunnung > 1) {
+            newOverNight = {
+                ...calConfigObj,
+                calculate_object: {
+                    newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
+                    newtimeend: calConfigObj.cpm_object.cpm_overnight_start,
                     overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
                 }
             }

@@ -28,7 +28,7 @@ export class InsertLogService {
             ,$5,$6
             ,$7,current_timestamp
             ,$8
-            );`
+            ) RETURNING tcpl_id;`
         const query = {
             text:sql,
             values:[
@@ -40,12 +40,12 @@ export class InsertLogService {
             ]
         }
         const res = await this.dbconnecttion.savePgData([query]);
-        if (res.error) {
+        if (res.error || res.values_response.length === 0) {
             console.log('Insert Calculate Log fail : '+res.error)
-            return res.error
+            return null;
         } else {
             console.log('Insert Calculate Log Success')
-            return null;
+            return res.values_response[0];
         }
     }
 }
