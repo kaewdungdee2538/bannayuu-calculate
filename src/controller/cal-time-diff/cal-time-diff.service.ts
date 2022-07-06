@@ -57,11 +57,6 @@ export class CalTimeDiffService {
           const timeZoneStart = moment(item.time_zone_start, 'HH:mm:ss');
           const timeZoneStop = moment(item.time_zone_stop, 'HH:mm:ss');
 
-          console.log({ timeStart });
-          console.log({ timeEnd });
-          console.log({ timeZoneStart });
-          console.log({ timeZoneStop });
-
           if (
             timeStart > timeZoneStart &&
             timeEnd < timeZoneStop &&
@@ -93,9 +88,7 @@ export class CalTimeDiffService {
             newTimeStart = '00:00:00';
             newTimeStop = '00:00:00';
           }
-          console.log(
-            `calDiffFormCalculateParkingHeader : ${newTimeStart} , ${newTimeStop}`,
-          );
+        //   console.log( `calDiffFormCalculateParkingHeader : ${newTimeStart} , ${newTimeStop}` );
           return this.calDiffToMinutes(newTimeStart, newTimeStop);
         },
       );
@@ -188,9 +181,7 @@ export class CalTimeDiffService {
     );
     const timeDiffReturn = Math.ceil(timeDiff.asMinutes());
     const minutesDiff = timeDiffReturn > 0 ? timeDiffReturn : 0;
-    console.log(
-      `calMinutesDiff : ${minutesDiff}, timeStart : ${timeStart},timeEnd : ${timeEnd}`,
-    );
+    // console.log( `calMinutesDiff : ${minutesDiff}, timeStart : ${timeStart},timeEnd : ${timeEnd}`);
     return minutesDiff;
   }
 
@@ -200,9 +191,9 @@ export class CalTimeDiffService {
     const diffTime = moment.duration(end.diff(start));
     const timeDiffReturn = Math.ceil(diffTime.asMinutes());
     const minuteDiff = timeDiffReturn > 0 ? timeDiffReturn : 0;
-    console.log(
-      `sumInterval : ${minuteDiff}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`,
-    );
+    // console.log(
+    //   `sumInterval : ${minuteDiff}, dateStart : ${dateStart}, dateEnd : ${dateEnd}`,
+    // );
     return minuteDiff;
   }
 
@@ -215,7 +206,7 @@ export class CalTimeDiffService {
     const daysText = days > 0 ? `${days} วัน ` : '';
     const hoursText = hours > 0 ? `${hours} ชั่วโมง ` : '';
     const minutesText = `${minutes} นาที`;
-    console.log(`days : ${days}, hours : ${hours}, minutes : ${minutes}`);
+    // console.log(`days : ${days}, hours : ${hours}, minutes : ${minutes}`);
     return `${daysText}${hoursText}${minutesText}`;
   }
 }

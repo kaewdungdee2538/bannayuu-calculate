@@ -58,7 +58,7 @@ export class GetCalConfigMasterService {
     async checkMasterWeekend(date_array: any) {
         const date = moment(date_array.datestart)
         const day = date.day();
-        console.log('check day of week :' + day)
+        // console.log('check day of week :' + day)
         if (day === 0 || day === 7)
             return true;
         return null;
@@ -240,7 +240,7 @@ export class GetCalConfigMasterService {
 
     async getMasterByIDWithPromotion(dayTypeMaster:any,body: any) {
         const company_id = body.company_id;
-        const cartype_id = body.cartype_id;
+        // const cartype_id = body.cartype_id;
         const cpm_id = dayTypeMaster.cpm_id
         let sql = `select cpm_id,cpm_code,cpm_name_th,cpm_name_en
         ,cartype_id
@@ -256,12 +256,12 @@ export class GetCalConfigMasterService {
         where delete_flag = 'N'
         and cpm_id = $1
         and company_id = $2
-        and cartype_id = $3
+
         limit 1
         ;`
         const query = {
             text: sql,
-            values: [cpm_id, company_id, cartype_id]
+            values: [cpm_id, company_id]
         }
         const res = await this.dbconnecttion.getPgData(query);
         if (res.error || res.result.length === 0)

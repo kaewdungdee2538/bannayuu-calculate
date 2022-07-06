@@ -10,7 +10,6 @@ export class GetCalConfigSubService {
     ) { }
 
     async calculateSub(inPutObj: any, body: any) {
-        console.log(JSON.stringify(inPutObj))
         const getSubConfigPromise = await inPutObj.map(async item => {
             // const cphObject = item.
             //************Header Main**************//
@@ -64,7 +63,6 @@ export class GetCalConfigSubService {
             return result;
         } else {
             const result = await this.getCalSubConfigOverInBase(inPutObj, body);
-            console.log(`getCalSubConfigOverInBase : ${JSON.stringify(result)}`)
             return result;
         }
     }
@@ -98,7 +96,6 @@ export class GetCalConfigSubService {
     }
 
     async getCalSubConfigOverInBase(inPutObj: any, body: any) {
-        console.log(`minuteInterval : ${inPutObj.minutes}`)
         const cph_id = inPutObj.cph_id;
         const minuteInterval = inPutObj.minutes;
         const company_id = body.company_id;
@@ -134,8 +131,6 @@ export class GetCalConfigSubService {
         const cph_id = inPutObj.cph_id;
         const company_id = body.company_id;
         const minuteInterval = inPutObj.minutes;
-        console.log('minuteInterval : '+minuteInterval)
-        console.log('inPutObj : '+JSON.stringify(inPutObj))
         let sql = `select cps_id
         from m_calculate_parking_sub mcps
         where mcps.delete_flag = 'N'
@@ -156,8 +151,6 @@ export class GetCalConfigSubService {
     }
 
     async calParkingPriceFromSubObj(inputObj: any, subObj: any) {
-        console.log({inputObj})
-        console.log({subObj})
         const minutesInput = inputObj.minutes > 0 ? inputObj.minutes : 0;
         //--------------เช็คว่าอยู่ในช่วงเวลาของ sub
         if (subObj) {

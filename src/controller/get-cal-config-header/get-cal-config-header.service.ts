@@ -23,6 +23,7 @@ export class GetCalConfigHeaderService {
         })
         //------------------get header zone
         const getHeaderConfig = await Promise.all(getHeaderConfigPromise);
+   
         // console.log(`getHeaderConfigZone : ${JSON.stringify(getHeaderConfig)}`)
         if (!getHeaderConfig[0]) throw new StatusException({
             error: this.errMessageUtilsTh.messageProcessFail
@@ -33,14 +34,14 @@ export class GetCalConfigHeaderService {
         const getOverNight = await this.calOverNightService.calculateOverNight(getHeaderConfig,body);
         // console.log('getOverNight : '+JSON.stringify(getOverNight));
         const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight, body);
-        console.log({calTimeDiff})
+        // console.log({calTimeDiff})
         // const calSub = await 
         return calTimeDiff;
     }
     async getCalHeaderConfig(inPutObj: any, body: any) {
         const cpm_id = inPutObj.cpm_object.cpm_id;
         const company_id = body.company_id;
-        const cartype_id = body.cartype_id;
+        // const cartype_id = body.cartype_id;
         let sql = `select cph_id,cph_code,mcph.cpm_id
         ,cph_name_th,cph_name_en,card_type_id,mcph.cartype_id
         ,to_char(time_zone_start::time,'HH24:MI:SS') as time_zone_start
@@ -52,12 +53,12 @@ export class GetCalConfigHeaderService {
         and cph_status = 'Y'
         and cpm_id = $1
         and company_id = $2
-        and cartype_id = $3
+
         order by cph_priority_no,time_zone_start
         ;`
         const query = {
             text: sql,
-            values: [cpm_id, company_id, cartype_id]
+            values: [cpm_id, company_id]
         }
         const res = await this.dbconnecttion.getPgData(query);
         if (res.error || res.result.length === 0)

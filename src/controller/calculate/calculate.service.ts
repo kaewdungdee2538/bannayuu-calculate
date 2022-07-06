@@ -46,17 +46,16 @@ export class CalculateService {
             const getPromotiion = await this.promotionService.getPromotion(body);
             //-----------------------Split Date
             const DateArray = resGetDateArray.data.dateArray;
-            console.log('DateArray : ' + JSON.stringify(DateArray))
             //-----------------------Get master calculate
             const getMasterDay = await this.checkMasterDay(DateArray, body, getPromotiion)
             //------------------------ตรวจสอบว่า แยกลดเวลาจอดออกเป็นวันหรือไม่
             const checkDiscountMinuteExpect = await this.localSettingLocalUtils.getCalculateSplitDiscountMinuteConfig(body.company_id);
             //------------------------คำนวณลดเวลาจอดฟรี
             const getNewCheckExceptTimePerDay = await this.checkExceptTimePerDay(getMasterDay, body, checkDiscountMinuteExpect, getPromotiion);
+
             const getCalHeader = await this.getCalConfigHeader.calHeader(getNewCheckExceptTimePerDay, body);
             //--------------------คำนวณหาค่าจอดจาก Sub หรือคำนวณหาจากช่วงที่อยู่นอกเหนือจาก Sub ด้วย
             const calFromSub = await this.getCalConfigSub.calculateSub(getCalHeader, body);
-            console.log({calFromSub})
             //--------------------คำนวณรวมค่าจอดทั้งหมด
             const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub, getPromotiion);
             //--------------------คำนวณเวลาจอดทั้งหมด
@@ -115,7 +114,7 @@ export class CalculateService {
             }
             //-----------------ตรวจสอบว่าอยู่ใน zone หรือไม่
             const checkMasterDateZone = await this.getCalConfigmaster.checkMasterDateZone(item, body);
-            console.log('checkMasterDateZone : ' + checkMasterDateZone)
+
             if (checkMasterDateZone) {
                 const dayTypeMaster = { ...item, day_type: "SPECIAL" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
@@ -123,7 +122,7 @@ export class CalculateService {
             }
             //----------check holiday
             const checkMasterHoliday = await this.getCalConfigmaster.checkMasterHoliday(item, body);
-            console.log('checkMasterHoliday : ' + checkMasterHoliday)
+   
             if (checkMasterHoliday) {
                 const dayTypeMaster = { ...item, day_type: "HOLIDAY" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
@@ -131,7 +130,7 @@ export class CalculateService {
             }
             //----------check weekend
             const checkMasterWeekend = await this.getCalConfigmaster.checkMasterWeekend(item);
-            console.log('checkMasterWeekend : ' + checkMasterWeekend);
+
             if (checkMasterWeekend) {
                 const dayTypeMaster = { ...item, day_type: "WEEKEND" };
                 const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
@@ -142,6 +141,8 @@ export class CalculateService {
             const cpm_object = await this.getCalConfigmaster.getMasterOfDay(dayTypeMaster, body)
             return { ...dayTypeMaster, cpm_object, promotion_object: getPromotiion }
         })
+
+        
         const checkMasterDay = await Promise.all(checkMasterDayPromise);
         return checkMasterDay;
     }
@@ -152,24 +153,22 @@ export class CalculateService {
         let minute_free = getHoursFree * 60 + getMinutesFree;
         //---------------------------Promotion discount minute
         let minute_discount = getPromotiion ? getPromotiion.promotion_minutes_discount_value : 0;
-
+        //---------เพิ่มส่วนลดนาทีเข้าไปก่อน
+        minute_free = minute_free + minute_discount;
         //เวลาออกล่าสุด ลบด้วย เวลาจอดฟรี
         let newMasterDay = [];
         // console.log('getMasterDay : ' + JSON.stringify(getMasterDay))
         for (let num = getMasterDay.length - 1; num >= 0; num--) {
-            //---------เพิ่มส่วนลดนาทีเข้าไปก่อน
-            minute_free = minute_free + minute_discount;
+           
             const dateStartStr = `${getMasterDay[num].dateend} 00:00:00`
             const dateEndStr = `${getMasterDay[num].dateend} ${getMasterDay[num].timeend}`
             const duration = await this.getDurationDateTime(dateStartStr, dateEndStr);
-            console.log('duration : ' + duration)
-            console.log('minute_free : ' + minute_free)
             //-----------กรณีไม่แยกยกเว้นเวลาจอดออกเป็นวัน จะลดเวลาจอดโดยรวมก่อน
             if (!checkDiscountMinuteExpectDay) {
+                
                 //----------------ถ้าคำนวณแล้วจำนวนนาทีที่เหลือในวันนั้น น้อยกว่า ส่วนลดจอดฟรี
                 if (duration < minute_free) {
                     const newTime = await this.setNewDatetimeAfterDisMinute(duration, dateEndStr);
-
                     newMasterDay.unshift({
                         ...getMasterDay[num],
                         have_a_discount_minute_from_cpm_time_for_free: true,
@@ -213,6 +212,7 @@ export class CalculateService {
                     newDate: newTime,
                     timeend: moment(newTime).format('HH:mm:ss'),
                 })
+                minute_free = minute_free - duration
             }
         }
         return newMasterDay;

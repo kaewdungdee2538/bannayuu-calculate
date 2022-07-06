@@ -13,10 +13,9 @@ export class SplitDateService {
 
 
     async splitDate(date_start: string, date_end: string) {
-        console.log('date_start : ' + date_start + ', date_end : ' + date_end)
         const middleware = await this.splitDateMiddleware(date_start, date_end);
         if (middleware) {
-            console.log('middleware date split : ' + middleware);
+            // console.log('middleware date split : ' + middleware);
             return {
                 error: true,
                 data: null,
@@ -27,7 +26,7 @@ export class SplitDateService {
             const dateDiff = moment(date_end,'YYYY-MM-DD').diff(moment(date_start,'YYYY-MM-DD'))
             const dateCount = moment(dateDiff).dayOfYear()
             if (dateCount > 1) {
-                console.log('datecount more than 1 day')
+                // console.log('datecount more than 1 day')
                 let dateCurrent = moment(date_start);
                 for (let num = 1; num <= dateCount; num++) {
                     if (num === 1) {
@@ -59,7 +58,7 @@ export class SplitDateService {
                     dateCurrent = moment(dateCurrent).add(1, 'day').set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
                 }
             } else {
-                console.log('datecount equal 1 day')
+                // console.log('datecount equal 1 day')
                 dateArray = [
                     {
                         start: moment(date_start).format('YYYY-MM-DD HH:mm:ss'),
@@ -71,7 +70,7 @@ export class SplitDateService {
                     }
                 ]
             }
-            console.log('dateCount : ' + dateCount);
+
             // console.log('dateArray : ' + JSON.stringify(dateArray));
             return {
                 error: false,
@@ -106,8 +105,6 @@ export class SplitDateService {
             return result.data
         })
         const intervalArray = await Promise.all(intervalArrayPromise);
-
-        console.log(intervalArray);
     }
 
     async
@@ -115,7 +112,7 @@ export class SplitDateService {
     async calDiffInterVal(date_start: string, date_end: string) {
         const middleware = await this.splitDateMiddleware(date_start, date_end);
         if (middleware) {
-            console.log('middleware date cal interval : ' + middleware);
+            // console.log('middleware date cal interval : ' + middleware);
             return {
                 error: true,
                 data: null,

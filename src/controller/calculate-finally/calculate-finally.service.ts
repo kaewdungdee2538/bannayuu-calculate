@@ -21,13 +21,10 @@ export class CalculateFinallyService {
         const getCalculateSplitDayUnits = await Promise.all(getCalculateUnitsSplitDayPromise);
         //---------------------Summary all days
         const getSummaryAllDays = await this.calculateParkingSummaryAllDays(getCalculateSplitDayUnits);
-        console.log('getSummaryAllDays: ' + JSON.stringify(getSummaryAllDays));
         //---------------------Get Over night fines all
         const getSummaryOverNights = await this.summaryOverNightAll(getSubObj);
-        console.log('getSummaryOverNights : ' + getSummaryOverNights);
         //---------------------Cal discount parking
         const summaryAndDiscount = this.summaryAndDiscount(getSummaryAllDays, getPromotiion)
-        console.log('summaryAndDiscount : ' + JSON.stringify(summaryAndDiscount));
         return {
             ...getSummaryAllDays
             , minutes_discount: summaryAndDiscount.minutes_discount

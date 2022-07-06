@@ -29,7 +29,7 @@ export class dbConnection {
         let error = null;
         try {
             // console.log('get'+JSON.stringify(querys));
-            console.log('getQueryPg');
+            // console.log('getQueryPg');
             const response = await queryRunner.query(querys);
             await queryRunner.commitTransaction();
             result = await response;

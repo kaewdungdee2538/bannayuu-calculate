@@ -81,7 +81,7 @@ export class FormatDataUtils {
     async IsDateTimeFormat(input: string) {
         try {
             const isdata = moment(input, "YYYY-MM-DD HH:mm:ss").isValid();
-            console.log('IsDateTimeFormat : '+isdata)
+            // console.log('IsDateTimeFormat : '+isdata)
             return isdata;
         } catch (err) {
             console.log(err);

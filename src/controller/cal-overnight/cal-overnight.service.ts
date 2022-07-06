@@ -12,7 +12,7 @@ export class CalOvernightService {
     overnight_stop_global: string = null;
 
     async calculateOverNight(calConfigObj: any,body: any) {
- 
+
         let day_runnung = 1;
         const calOverNightPromise = calConfigObj.map(async item => {
             if (await this.checkOverNight(item,body.start_date,body.end_date)) {
@@ -21,10 +21,22 @@ export class CalOvernightService {
                 return newOverNight;
             } else {
                 day_runnung++;
+        
+                //>>>>>>>>>>>>>>>>>>>> คำนวณแบบไม่รวมช่วงเวลาข้ามคืน
+                // return {
+                //     ...item,
+                //     calculate_object: {
+                //         newtimestart: this.overnight_stop_global ? this.overnight_stop_global : item.timestart,//วันข้ามคืนก่อนหน้า
+                //         newtimeend: item.timeend,
+                //         overnight_fine_amount: 0
+                //     }
+
+                // }
+
                 return {
                     ...item,
                     calculate_object: {
-                        newtimestart: this.overnight_stop_global ? this.overnight_stop_global : item.timestart,//วันข้ามคืนก่อนหน้า
+                        newtimestart: item.timestart,//วันข้ามคืนก่อนหน้า
                         newtimeend: item.timeend,
                         overnight_fine_amount: 0
                     }
@@ -33,6 +45,7 @@ export class CalOvernightService {
             }
         })
         const calOverNight = await Promise.all(calOverNightPromise)
+        console.log({calOverNight})
         //------------------------Reset value
         day_runnung = 1;
         this.overnight_stop_global = null;
@@ -49,71 +62,127 @@ export class CalOvernightService {
         }
         const timeEndOvernight = moment(calConfigObj.cpm_object.cpm_overnight_start, 'HH:mm:ss')
         const timeEnd = moment(calConfigObj.timeend, 'HH:mm:ss');
-        console.log(`timeEndOvernight : ${timeEndOvernight}`)
+
         if (calConfigObj.cpm_object.cpm_overnight_status.toUpperCase() === 'Y' && timeEndOvernight <= timeEnd)
             return true;
         return false;
     }
 
     calNewTimeForOverNight(calConfigObj: any, dayCount: number, dayRunnung: number) {
-        console.log({calConfigObj})
-        console.log({dayCount})
-        console.log({dayRunnung})
+
         let newOverNight = null;
-        //-----ถ้าข้ามคืนเกิน 1 วัน
-        if (dayCount > 1 && dayCount === dayRunnung) {
-            let newOverNightEnd;
-            if (calConfigObj.timeend < this.overnight_stop_global)
-                newOverNightEnd = this.overnight_stop_global
-            else
-                newOverNightEnd = calConfigObj.timeend
-            //----------------
+
+        //>>>>>>>>>>>>>>>>>>>>> คำนวณแบบไม่รวมช่วงเวลาข้ามคืน
+        // //-----ถ้าข้ามคืนเกิน 1 วัน
+        // if (dayCount > 1 && dayCount === dayRunnung) {
+        //     let newOverNightEnd;
+        //     if (calConfigObj.timeend < this.overnight_stop_global)
+        //         newOverNightEnd = this.overnight_stop_global
+        //     else
+        //         newOverNightEnd = calConfigObj.timeend
+        //     //----------------
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
+        //             newtimeend: newOverNightEnd,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+
+        // } else if (dayCount === 1) {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: calConfigObj.timestart,
+        //             newtimeend: calConfigObj.timeend,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // } else if (dayRunnung > 1) {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
+        //             newtimeend: calConfigObj.timeend,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // } else if (dayCount > 1 && dayRunnung === 1){
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: calConfigObj.timestart,
+        //             newtimeend: calConfigObj.timeend,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // }else {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: calConfigObj.timestart,
+        //             newtimeend: calConfigObj.cpm_object.cpm_overnight_start,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // }
+
+        //>>>>>>>>>>>>>>>>>>>>> คำนวนแบบรวมช่วงเวลาข้ามคืน
+        //  if (dayCount > 1 && dayCount === dayRunnung) {
+        //     let newOverNightEnd;
+        //     if (calConfigObj.timeend < this.overnight_stop_global)
+        //         newOverNightEnd = this.overnight_stop_global
+        //     else
+        //         newOverNightEnd = calConfigObj.timeend
+        //     //----------------
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
+        //             newtimeend: newOverNightEnd,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+
+        // } else if (dayCount === 1) {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: calConfigObj.timestart,
+        //             newtimeend: calConfigObj.timeend,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // } else if (dayRunnung > 1) {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
+        //             newtimeend: calConfigObj.timeend,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // } else if (dayCount > 1 && dayRunnung === 1){
             newOverNight = {
                 ...calConfigObj,
                 calculate_object: {
-                    newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
-                    newtimeend: newOverNightEnd,
+                    newtimestart: calConfigObj.timestart,
+                    newtimeend: calConfigObj.timeend,
                     overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
                 }
             }
 
-        } else if (dayCount === 1) {
-            newOverNight = {
-                ...calConfigObj,
-                calculate_object: {
-                    newtimestart: calConfigObj.timestart,
-                    newtimeend: calConfigObj.timeend,
-                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
-                }
-            }
-        } else if (dayRunnung > 1) {
-            newOverNight = {
-                ...calConfigObj,
-                calculate_object: {
-                    newtimestart: this.overnight_stop_global,//วันข้ามคืนก่อนหน้า
-                    newtimeend: calConfigObj.timeend,
-                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
-                }
-            }
-        } else if (dayCount > 1 && dayRunnung === 1){
-            newOverNight = {
-                ...calConfigObj,
-                calculate_object: {
-                    newtimestart: calConfigObj.timestart,
-                    newtimeend: calConfigObj.timeend,
-                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
-                }
-            }
-        }else {
-            newOverNight = {
-                ...calConfigObj,
-                calculate_object: {
-                    newtimestart: calConfigObj.timestart,
-                    newtimeend: calConfigObj.cpm_object.cpm_overnight_start,
-                    overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
-                }
-            }
-        }
+        // }else {
+        //     newOverNight = {
+        //         ...calConfigObj,
+        //         calculate_object: {
+        //             newtimestart: calConfigObj.timestart,
+        //             newtimeend: calConfigObj.cpm_object.cpm_overnight_start,
+        //             overnight_fine_amount: calConfigObj.cpm_object.cpm_fine_amount
+        //         }
+        //     }
+        // }
         //-----เก็บเวลาข้ามคืนไว้เพื่อใช้ในวันถัดไป
         this.overnight_stop_global = calConfigObj.cpm_object.cpm_overnight_stop;
         return newOverNight;
