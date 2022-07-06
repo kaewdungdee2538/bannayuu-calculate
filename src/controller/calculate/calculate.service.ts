@@ -56,6 +56,7 @@ export class CalculateService {
             const getCalHeader = await this.getCalConfigHeader.calHeader(getNewCheckExceptTimePerDay, body);
             //--------------------คำนวณหาค่าจอดจาก Sub หรือคำนวณหาจากช่วงที่อยู่นอกเหนือจาก Sub ด้วย
             const calFromSub = await this.getCalConfigSub.calculateSub(getCalHeader, body);
+            console.log({calFromSub})
             //--------------------คำนวณรวมค่าจอดทั้งหมด
             const calParkingFinally = await this.calculateFinallyService.calculateParkingPriceFinally(calFromSub, getPromotiion);
             //--------------------คำนวณเวลาจอดทั้งหมด

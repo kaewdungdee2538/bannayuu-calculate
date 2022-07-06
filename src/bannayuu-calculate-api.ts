@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import {configfile} from './conf/config.json';
-import { dbConnection } from './pg.database/pg.database';
+import { dbConnection } from 'src/pg.database/pg.database';
 const connect = new dbConnection;
 console.log(JSON.stringify(configfile))
 const port = configfile.port_api || 9046;

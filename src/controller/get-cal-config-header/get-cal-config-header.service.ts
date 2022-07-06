@@ -23,16 +23,17 @@ export class GetCalConfigHeaderService {
         })
         //------------------get header zone
         const getHeaderConfig = await Promise.all(getHeaderConfigPromise);
-        console.log(`getHeaderConfigZone : ${JSON.stringify(getHeaderConfig)}`)
+        // console.log(`getHeaderConfigZone : ${JSON.stringify(getHeaderConfig)}`)
         if (!getHeaderConfig[0]) throw new StatusException({
             error: this.errMessageUtilsTh.messageProcessFail
             , result: null
             , message: this.errMessageUtilsTh.errCalParkingHeaderMainNotSet
             , statusCode: 200
         }, 200)
-        const getOverNight = await this.calOverNightService.calculateOverNight(getHeaderConfig);
+        const getOverNight = await this.calOverNightService.calculateOverNight(getHeaderConfig,body);
         // console.log('getOverNight : '+JSON.stringify(getOverNight));
         const calTimeDiff = await this.calTimeDiffService.calTimeDiff(getOverNight, body);
+        console.log({calTimeDiff})
         // const calSub = await 
         return calTimeDiff;
     }

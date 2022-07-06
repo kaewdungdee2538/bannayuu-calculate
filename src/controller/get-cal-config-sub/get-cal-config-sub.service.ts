@@ -10,6 +10,7 @@ export class GetCalConfigSubService {
     ) { }
 
     async calculateSub(inPutObj: any, body: any) {
+        console.log(JSON.stringify(inPutObj))
         const getSubConfigPromise = await inPutObj.map(async item => {
             // const cphObject = item.
             //************Header Main**************//
@@ -18,6 +19,7 @@ export class GetCalConfigSubService {
             const getSubFromHeaderMain = await this.getCalSubFromBetweenOrLastSub(subHeaderMainInput, body)
             //------------คำนวณค่าจอดหลัก
             const calParkingSubFromMain = await this.calParkingPriceFromSubObj(subHeaderMainInput, getSubFromHeaderMain);
+            // console.log({calParkingSubFromMain})
             //------------For Return
             const SubFromHeaderMainObj = {
                 ...item.calculate_object.calculate_form_zone.main,
@@ -154,6 +156,8 @@ export class GetCalConfigSubService {
     }
 
     async calParkingPriceFromSubObj(inputObj: any, subObj: any) {
+        console.log({inputObj})
+        console.log({subObj})
         const minutesInput = inputObj.minutes > 0 ? inputObj.minutes : 0;
         //--------------เช็คว่าอยู่ในช่วงเวลาของ sub
         if (subObj) {

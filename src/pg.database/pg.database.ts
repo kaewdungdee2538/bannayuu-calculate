@@ -8,7 +8,7 @@ export class dbConnection {
                 type: 'postgres',
                 host: configfile.host_name,
                 port: 5432,
-                username: 'cit',
+                username: 'postgres',
                 password: 'db13apr',
                 database: configfile.database_name
             });
