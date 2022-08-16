@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { HttpModule , MiddlewareConsumer, Module } from '@nestjs/common';
 import { DefaultValueMiddleware } from 'src/middleware/default/default-value.middleware';
 import { DateTimeMiddleware } from 'src/middleware/time/datetime.middleware';
 import { dbConnection } from 'src/pg.database/pg.database';
@@ -22,7 +22,7 @@ import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports:[
-
+    HttpModule 
   ],
   controllers: [CalculateController],
   providers: [

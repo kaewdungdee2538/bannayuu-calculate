@@ -37,7 +37,8 @@ export class vsActionOutVerifyEstampMiddleware implements NestMiddleware {
             return this.errMessageUrilTh.errVisitorRecordIdProhibitSpecial;
         else if(!this.formatDataUtils.IsNumber(body.visitor_record_id))
             return this.errMessageUrilTh.errVisitorRecordIdNotNumber;
-        return await this.CheckVisitorRecordInBase(body);
+        // return await this.CheckVisitorRecordInBase(body);
+        return null;
     }
 
     async CheckVisitorRecordInBase(body: any) {

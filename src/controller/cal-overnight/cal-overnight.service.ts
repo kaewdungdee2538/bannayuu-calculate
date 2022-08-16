@@ -45,7 +45,6 @@ export class CalOvernightService {
             }
         })
         const calOverNight = await Promise.all(calOverNightPromise)
-        console.log({calOverNight})
         //------------------------Reset value
         day_runnung = 1;
         this.overnight_stop_global = null;

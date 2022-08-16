@@ -283,4 +283,6 @@ export class ErrMessageUtilsTH{
     errPromotionCodeNotFound = 'กรุณากรอกโค้ดส่วนลด'
     errPromotionCodeProhitbitSpecial = 'โค้ดส่วนลดห้ามมีอักขระพิเศษ หรือช่องว่าง'
 
+    errConnectServerCalculateLongtimeError = 'เชื่อม API Calculate longtime ล้มเหลว'
+
 }
