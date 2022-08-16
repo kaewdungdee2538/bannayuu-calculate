@@ -153,7 +153,7 @@ export class CalculateService {
         //-----------------------Calculate parking longtime
         const resGetCalculateLongtime = await this.getCalculateLongtime(
           body,
-          getPromotiion.promotion_code,
+          getPromotiion ? getPromotiion.promotion_code : '',
         ).then((response) => {
           return response.data;
         });
