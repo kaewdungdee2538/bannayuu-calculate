@@ -112,7 +112,7 @@ export class CalculateService {
             end_date,
             sum_interval: minuteTimeDiffAll,
             sum_interval_text: minutesTimeDiffAllIsTextFormat,
-            sum_interval_after_discount_minute: minutesTimeDiffAfterDiscountIsTextFormat,
+            sum_interval_after_discount_minute_text: minutesTimeDiffAfterDiscountIsTextFormat,
             ...calParkingFinally,
           },
           daily_data: [...calFromSub],
