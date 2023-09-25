@@ -190,6 +190,7 @@ export class CalculateService {
             summary_data: {
               ...calculateFinallyObj.summary_data,
               tcpl_id: isInsertLogFail.tcpl_id,
+              tcpl_code:isInsertLogFail.tcpl_code,
             },
             daily_data: null,
           };

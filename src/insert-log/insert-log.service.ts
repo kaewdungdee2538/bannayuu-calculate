@@ -28,7 +28,7 @@ export class InsertLogService {
             ,$5,$6
             ,$7,current_timestamp
             ,$8
-            ) RETURNING tcpl_id;`
+            ) RETURNING tcpl_id,tcpl_code;`
         const query = {
             text:sql,
             values:[
