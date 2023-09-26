@@ -56,7 +56,7 @@ export class CalculateService {
       const isCalculateSplitDayConfig = await this.localSettingLocalUtils.getCalculateSplitDayConfig(
         body.company_id,
       );
-      console.log('calculate_split_day : ',isCalculateSplitDayConfig)
+      console.log('calculate_split_day : ', isCalculateSplitDayConfig);
       if (isCalculateSplitDayConfig) {
         //-----------------------Split Date
         const DateArray = resGetDateArray.data.dateArray;
@@ -122,6 +122,7 @@ export class CalculateService {
           body,
           calculateFinallyObj,
         );
+        console.log(isInsertLogFail[0]);
         if (!isInsertLogFail)
           throw new StatusException(
             {
@@ -135,7 +136,7 @@ export class CalculateService {
         //----------------------Is success and finish return
         const calculateFinishObj = {
           summary_data: {
-            tcpl_id: isInsertLogFail.tcpl_id,
+            ...isInsertLogFail,
             ...calculateFinallyObj.summary_data,
           },
           daily_data: [...calculateFinallyObj.daily_data],
@@ -175,7 +176,7 @@ export class CalculateService {
             body,
             calculateFinallyObj,
           );
-          if (!isInsertLogFail)
+          if (!isInsertLogFail) {
             throw new StatusException(
               {
                 error: isInsertLogFail,
@@ -185,13 +186,14 @@ export class CalculateService {
               },
               200,
             );
+          }
           //----------------------Is success and finish return
+          const summary_data = {
+            ...isInsertLogFail,
+            ...calculateFinallyObj.summary_data,
+          };
           const calculateFinishObj = {
-            summary_data: {
-              ...calculateFinallyObj.summary_data,
-              tcpl_id: isInsertLogFail.tcpl_id,
-              tcpl_code:isInsertLogFail.tcpl_code,
-            },
+            summary_data,
             daily_data: null,
           };
           throw new StatusException(
