@@ -224,7 +224,6 @@ export class CalculateService {
       cardNumber: cardNumber?.toString(),
       promotionCode: promotionCode,
     };
-    console.log(params);
     return this.httpService
       .post(configfile.URL_CALCULATE_LONGTIME, params)
       .toPromise()
