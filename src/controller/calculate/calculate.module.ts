@@ -48,7 +48,7 @@ export class CalculateModule {
       .apply(DefaultValueMiddleware)
       .forRoutes('api/bannayuu/calculate/*');
     consumer
-      .apply(DateTimeMiddleware, vsActionOutVerifyEstampMiddleware, EmployeeMiddleware)
+      .apply(DateTimeMiddleware, vsActionOutVerifyEstampMiddleware)
       .forRoutes('api/bannayuu/calculate/cal-all');
   }
 }

@@ -216,12 +216,12 @@ export class CalculateService {
   ): Promise<AxiosResponse> {
     const companyId = valuesObj.company_id;
     const recordIn = valuesObj.visitor_record_id;
-    const cardNumber = valuesObj.employee_id;
+    const cardNumber = valuesObj.visitor_record_id;
     const promotionCode = promotionCodeInput.toUpperCase();
     const params = {
       companyId: parseInt(companyId),
       recordIn: parseInt(recordIn),
-      cardNumber: cardNumber.toString(),
+      cardNumber: cardNumber?.toString(),
       promotionCode: promotionCode,
     };
     console.log(params);
