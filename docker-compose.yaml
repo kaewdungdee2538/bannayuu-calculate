@@ -17,7 +17,7 @@ services:
       - DB_NAME=demo_bannayuu_db
       - DB_USERNAME=postgres
       - DB_PASSWORD=P@ssw0rd
-      - URL_CALCULATE_LONGTIME=http://172.25.30.64:36008/api/v1/bannayuu/calculate/master/cal
+      - URL_CALCULATE_MASTER=http://172.25.30.64:36007/api/v1/bannayuu/calculate/master/cal
       - JWT_TOKEN=f56c3775-07b0-45e7-800f-304274533cb7
     
     

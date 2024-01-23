@@ -225,11 +225,11 @@ export class CalculateService {
       promotionCode: promotionCode,
     };
     return this.httpService
-      .post(configfile.URL_CALCULATE_LONGTIME, params)
+      .post(configfile.URL_CALCULATE_MASTER, params)
       .toPromise()
       .catch((err) => {
         console.log(
-          `เชื่อมต่อ api ${configfile.URL_CALCULATE_LONGTIME} ล้มเหลว`,
+          `เชื่อมต่อ api ${configfile.URL_CALCULATE_MASTER} ล้มเหลว`,
         );
         throw new StatusException(
           {

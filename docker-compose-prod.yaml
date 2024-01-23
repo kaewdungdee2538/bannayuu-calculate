@@ -17,6 +17,6 @@ services:
       - DB_NAME=cit_bannayuu_db
       - DB_USERNAME=cit
       - DB_PASSWORD=db13apr
-      - URL_CALCULATE_LONGTIME=http://localhost:4095/api/v1/bannayuu/calculate/master/cal
+      - URL_CALCULATE_MASTER=http://localhost:4095/api/v1/bannayuu/calculate/master/cal
       - JWT_TOKEN=f56c3775-07b0-45e7-800f-304274533cb7
     

@@ -25,5 +25,5 @@ export const configfile = {
     db_name: process.env.DB_NAME,
     db_username: process.env.DB_USERNAME,
     db_password: process.env.DB_PASSWORD,
-    URL_CALCULATE_LONGTIME: process.env.URL_CALCULATE_LONGTIME || "http://localhost:36008/api/v1/bannayuu/calculate/master/cal"
+    URL_CALCULATE_MASTER: process.env.URL_CALCULATE_MASTER || "http://localhost:36008/api/v1/bannayuu/calculate/master/cal"
 }
