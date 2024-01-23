@@ -212,8 +212,8 @@ export class CalculateService {
 
   async getCalculateLongtime(
     valuesObj: any,
-    promotionCodeInput: string,
-  ): Promise<AxiosResponse> {
+    promotionCodeInput: any,
+  ): Promise<any> {
     const companyId = valuesObj.company_id;
     const recordIn = valuesObj.visitor_record_id;
     const cardNumber = valuesObj.visitor_record_id;

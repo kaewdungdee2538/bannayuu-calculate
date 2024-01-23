@@ -5,7 +5,7 @@ import {configfile} from './conf/config.json';
 import { dbConnection } from 'src/pg.database/pg.database';
 const connect = new dbConnection;
 console.log(JSON.stringify(configfile))
-const port = configfile.port_api || 9046;
+const port = configfile.app_port || 9046;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule,{ bodyParser:true, cors: true });
   

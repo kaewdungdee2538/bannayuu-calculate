@@ -18,7 +18,6 @@ import { PromotionService } from '../promotion/promotion.service';
 import { vsActionOutVerifyEstampMiddleware } from 'src/middleware/calculate/calculate.middleware';
 import { EmployeeMiddleware } from 'src/middleware/employee/employee.middleware';
 import { InsertLogService } from 'src/insert-log/insert-log.service';
-import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports:[
