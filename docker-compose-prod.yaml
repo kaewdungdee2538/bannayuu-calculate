@@ -1,8 +1,8 @@
 version: '3'
 services:
 
-  api-bannayuu-calcualte-main:
-    image: api-bannayuu-calcualte-main:1.0.0
+  api-bannayuu-calculate:
+    image: api-bannayuu-calculate:1.0.0
     ports:
       - 4060:4060
     volumes:
